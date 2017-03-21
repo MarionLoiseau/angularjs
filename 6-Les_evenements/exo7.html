@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8">
+    <title>AngularJS : Les Évènements : Exercice 7</title>
+
+  </head>
+  <body>
+    <div ng-controller="monControleur as monCtrl">
+      <form name="monFormulaire" ng-submit="monCtrl.search(username)">
+        <input type="search" required placeholder="Profil recherché" ng-model="username"/>
+        <input type="submit" value="Rechercher" />
+      </form>
+      <h1 ng-bind="user.name"></h1>
+      <h5><a href="{{user.html_url}}" target="_blank" ng-bind="user.html_url"></a></h5>
+      <div>
+        <h1 ng-bind="error"></h1>
+        
+      </div>
+      <div>
+        <img ng-src="{{user.avatar_url}}" ng-alt="photo profil github">
+        <ul ng-repeat="repo in repos | orderBy: 'language'">
+          <li ng-bind="repo.name + ' ' + repo.language"></li>
+        </ul>
+      </div>
+    </div>
+    <!-- On charge le framework Angular JS dans le document -->
+    <script src="../angular.min.js"></script>
+
+    <!-- On on écrit ou on charge son script JavaScript utilisant Angular JS -->
+    <script>
+      //Bonne pratique : programmer en mode strict JavaScript (voir : https://developer.mozilla.org/fr/docs/Web/JavaScript/Reference/Strict_mode)
+      'use strict';
+      //Bonne pratique : écrire son code dans une fonction anonyme auto-exécutable pour contrôler l'exposition des variables à l'objet global Window. 
+      (function(){
+        angular.module('angularjsExercice7', []);
+        
+        angular.module('angularjsExercice7').controller('monControleur', ['$scope', '$http', function($scope, $http){
+
+          this.search = function(username){
+            $scope.error = '';
+            $http.get("http://api.github.com/users/" + username).then(onUserComplete, onError)
+          };
+          
+          var onUserComplete = function(response){
+            $scope.user = response.data;
+            console.log($scope.user);
+            $http.get($scope.user.repos_url).then(onRepos, onError)
+          };
+          
+          var onRepos = function(response){
+            $scope.repos = response.data;
+            console.log($scope.repos);
+          }
+          
+          var onError = function(reason){
+            $scope.error = "oups, il y a une erreur";
+          };
+          
+        }]);
+        angular.bootstrap(window.document, ['angularjsExercice7'], {strictDi:true});
+      })();
+      //Fin de la fonction anonyme auto-exécutable
+    </script>
+  </body>
+</html>
